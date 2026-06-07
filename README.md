@@ -291,8 +291,6 @@ digital_filter/
 │   └── fir_tb.v             Self-checking testbench
 │                             — 4 tests: impulse, DC, HF reject, step
 │
-├── sim/
-│   └── run.do               QuestaSim compile + simulate script
 │
 ├── vivado/
 │   ├── constraints.xdc      Artix-7 timing + pin assignments (Basys3)
@@ -408,38 +406,6 @@ Cutoff:          Fc = 0.1×Fs means blocks above 10% of Fs
 WNS > 0:         timing closure achieved
 RTL-to-bitstream: Synthesis → P&R → Timing → Bitstream
 ```
-
----
-
-## Interview Questions You Will Face
-
-**Q: Why is the accumulator 40-bit wide?**
-A: 16-bit data × 16-bit coefficient = 32-bit product.
-   Summing 8 products needs 32 + log2(8) = 35 bits minimum.
-   40 bits chosen for safety margin.
-
-**Q: How did you choose the coefficients?**
-A: Low-pass windowed sinc method with cutoff at 10% of Fs.
-   Coefficients can be generated using scipy.signal in Python:
-   h = scipy.signal.firwin(8, 0.1) then scaled to Q15.
-
-**Q: What is the latency of your filter?**
-A: N/2 = 4 sample periods of group delay (linear phase FIR).
-   Plus 1 clock cycle pipeline register in fir_top.v.
-   Total: 5 clock cycles from input to valid output.
-
-**Q: Why add I/O registers in fir_top.v?**
-A: Input and output registers break the critical timing path
-   at the FPGA boundary, improving timing closure and
-   allowing higher clock frequencies.
-
-**Q: What is the difference between FIR and IIR?**
-A: FIR: finite impulse response, always stable, linear phase,
-   uses only feedforward (no feedback), more taps needed.
-   IIR: infinite impulse response, uses feedback (poles),
-   can be unstable, non-linear phase, fewer taps needed.
-
----
 
 *Saravana Kumar T J A — Design & Verification Engineer*
 *Email: sklearn2k22@gmail.com*
